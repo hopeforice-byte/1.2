@@ -1,0 +1,27 @@
+{
+  "small_modules": [
+    {"id": "mod_radiators", "name": "Усиленные радиаторы", "effect": "+2 к сбросу тепла", "price": 400, "rarity": "common"},
+    {"id": "mod_scanner", "name": "Сканер эфира", "effect": "+2 NET, видит невидимых в 20 м", "price": 500, "rarity": "uncommon"},
+    {"id": "mod_energy_shield", "name": "Энергощит", "effect": "Реакция — сопротивление атаке, 3 заряда", "price": 750, "rarity": "uncommon"},
+    {"id": "mod_improved_shield", "name": "Улучшенный энергощит", "effect": "+25 врем. ХП, +5/раунд", "price": 1500, "rarity": "rare"},
+    {"id": "mod_invisibility", "name": "Модуль «Невидимость»", "effect": "1/день — невидимость на 1 минуту", "price": 1000, "rarity": "rare"},
+    {"id": "mod_hud", "name": "Тактический HUD", "effect": "+1 BS на 30+ м", "price": 500, "rarity": "common"},
+    {"id": "mod_iff", "name": "Система «Свой-чужой»", "effect": "Не может атаковать союзников", "price": 350, "rarity": "common"},
+    {"id": "mod_ram", "name": "Усилитель тарана", "effect": "+1d6 к урону при таране", "price": 400, "rarity": "common"},
+    {"id": "mod_camouflage", "name": "Адаптивный камуфляж", "effect": "Преимущество на AG (скрытность)", "price": 800, "rarity": "uncommon"},
+    {"id": "mod_teleport", "name": "Телепортатор", "effect": "2/день — телепорт 10 м, +3 тепла", "price": 1100, "rarity": "rare"},
+    {"id": "mod_jammer_small", "name": "Глушилка (малая)", "effect": "Радиус 10 м, вражеская связь не работает", "price": 500, "rarity": "uncommon"},
+    {"id": "mod_smoke", "name": "Дымовая завеса", "effect": "Облако 10×10 м на 1d4 раунда", "price": 150, "rarity": "common"},
+    {"id": "mod_roar", "name": "Усилитель рёва", "effect": "+2 INF (запугивание), Испуг в 10 м", "price": 200, "rarity": "common"},
+    {"id": "mod_extra_ammo", "name": "Дополнительный боеприпас", "effect": "+50% патронов/ракет", "price": 300, "rarity": "common"}
+  ],
+  "medium_modules": [
+    {"id": "mod_extra_armor", "name": "Дополнительная броня", "effect": "+5 ХП, -1 м скорости", "price": 600, "rarity": "common"},
+    {"id": "mod_armor_plate", "name": "Доп. бронеплита", "effect": "+10 ХП, -1 м скорости", "price": 800, "rarity": "common"},
+    {"id": "mod_accelerators", "name": "Ускорители", "effect": "+3 м скорости", "price": 700, "rarity": "uncommon"},
+    {"id": "mod_repair_drone", "name": "Ремонтный дрон", "effect": "+1d4 ХП/ход (пассивно)", "price": 900, "rarity": "uncommon"},
+    {"id": "mod_jammer_medium", "name": "Глушилка (средняя)", "effect": "Радиус 15 м, вражеская связь — помеха", "price": 800, "rarity": "uncommon"},
+    {"id": "mod_field_generator", "name": "Генератор поля", "effect": "+1 СУ союзникам в 10 м", "price": 1000, "rarity": "rare"},
+    {"id": "mod_mobile_workshop", "name": "Мобильная мастерская", "effect": "Ремонт союзных мехов (1d8+2, 3/день)", "price": 900, "rarity": "uncommon"}
+  ]
+}

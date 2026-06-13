@@ -1,0 +1,59 @@
+{
+  "reactors": [
+    {"id": "reactor_horizon_s", "name": "«Горизонт-С»", "heat_dissipation": 3, "hp_bonus": 0, "price": 300, "rarity": "common", "manufacturer": "Горизонт-Тех"},
+    {"id": "reactor_horizon_u", "name": "«Горизонт-У»", "heat_dissipation": 4, "hp_bonus": 0, "price": 600, "rarity": "common", "manufacturer": "Горизонт-Тех"},
+    {"id": "reactor_quant5", "name": "«Квант-5»", "heat_dissipation": 4, "hp_bonus": 5, "price": 700, "rarity": "uncommon", "manufacturer": "Квант-Индастриз"},
+    {"id": "reactor_quant7", "name": "«Квант-7» (древний)", "heat_dissipation": 5, "hp_bonus": 10, "price": "Артефакт", "rarity": "legendary", "manufacturer": "Квант-Индастриз", "traits": ["Автономный"]},
+    {"id": "reactor_whisper", "name": "«Тихий Шёпот»", "heat_dissipation": 3, "hp_bonus": 0, "price": 1000, "rarity": "rare", "manufacturer": "Аплинк", "traits": ["Не обнаруживается сенсорами"]},
+    {"id": "reactor_scavenger", "name": "«Мусорщик»", "heat_dissipation": "1d4+1", "hp_bonus": 0, "price": 250, "rarity": "common", "manufacturer": "Рейдеры", "traits": ["Случайный сброс тепла"]},
+    {"id": "reactor_afterburner", "name": "«Форсаж»", "heat_dissipation": 2, "hp_bonus": 0, "price": 500, "rarity": "uncommon", "manufacturer": "Независимые", "traits": ["+1 м скорости"]},
+    {"id": "reactor_phoenix", "name": "«Искра Феникса» (древний)", "heat_dissipation": 4, "hp_bonus": 5, "price": "Артефакт", "rarity": "legendary", "manufacturer": "Феникс-Продакшн", "traits": ["Раз в день — 1d8 ХП меху"]},
+    {"id": "reactor_bio", "name": "«Био-Сердце»", "heat_dissipation": 3, "hp_bonus": 0, "price": 1400, "rarity": "rare", "manufacturer": "Корпорация", "traits": ["Регенерация +2 ХП/ход"]}
+  ],
+  "armor": [
+    {"id": "armor_horizon_l", "name": "«Горизонт-Л»", "TB_bonus": 1, "SU_bonus": 1, "speed_penalty": 0, "price": 350, "rarity": "common", "manufacturer": "Горизонт-Тех"},
+    {"id": "armor_horizon_s", "name": "«Горизонт-С»", "TB_bonus": 2, "SU_bonus": 2, "speed_penalty": 1, "price": 700, "rarity": "common", "manufacturer": "Горизонт-Тех"},
+    {"id": "armor_pantsir", "name": "«Панцирь»", "TB_bonus": 2, "SU_bonus": 2, "speed_penalty": 1, "price": 700, "rarity": "common", "manufacturer": "Братство"},
+    {"id": "armor_krepost", "name": "«Крепость»", "TB_bonus": 3, "SU_bonus": 3, "speed_penalty": 2, "price": 1400, "rarity": "uncommon", "manufacturer": "Братство", "traits": ["Помеха на AG (скрытность)"]},
+    {"id": "armor_composite_s", "name": "«Композит-С»", "TB_bonus": 1, "SU_bonus": 1, "speed_penalty": 0, "price": 900, "rarity": "uncommon", "manufacturer": "Совет"},
+    {"id": "armor_chameleon", "name": "«Хамелеон»", "TB_bonus": 1, "SU_bonus": 1, "speed_penalty": 0, "price": 1000, "rarity": "rare", "manufacturer": "Аплинк", "traits": ["Преимущество на AG (скрытность)"]},
+    {"id": "armor_scraps", "name": "«Лоскуты»", "TB_bonus": "1d4", "SU_bonus": "1d4", "speed_penalty": 0, "price": 350, "rarity": "common", "manufacturer": "Рейдеры", "traits": ["Случайный бонус"]},
+    {"id": "armor_ekran_b", "name": "«Экран-Б»", "TB_bonus": 2, "SU_bonus": 2, "speed_penalty": 0, "price": 1100, "rarity": "uncommon", "manufacturer": "АркТех", "traits": ["Сопротивление электричеству"]},
+    {"id": "armor_mirror", "name": "«Зеркальная Чешуя» (древняя)", "TB_bonus": 2, "SU_bonus": 2, "speed_penalty": 0, "price": "Артефакт", "rarity": "legendary", "manufacturer": "АркТех", "traits": ["Отражает лазерный луч раз в день"]},
+    {"id": "armor_adaptive", "name": "«Адаптивная Мембрана»", "TB_bonus": 2, "SU_bonus": 2, "speed_penalty": 0, "price": 1400, "rarity": "rare", "manufacturer": "Корпорация", "traits": ["Сопротивление последнему типу урона", "Уязвимость к огню"]}
+  ],
+  "drives": [
+    {"id": "drive_standard", "name": "«Шагающий-Б»", "speed_bonus": 0, "price": 150, "rarity": "common", "traits": []},
+    {"id": "drive_speed", "name": "«Скороход»", "speed_bonus": 1, "price": 350, "rarity": "common", "traits": []},
+    {"id": "drive_tracks", "name": "«Гусеница»", "speed_bonus": "2 ровно / -2 пересечённо", "price": 450, "rarity": "uncommon", "traits": []},
+    {"id": "drive_jump", "name": "«Кузнечик»", "speed_bonus": 0, "price": 600, "rarity": "uncommon", "traits": ["Прыжок 5×10 м (3/день)"]},
+    {"id": "drive_stealth", "name": "«Бесшумный Шаг»", "speed_bonus": 0, "price": 550, "rarity": "rare", "traits": ["Преимущество на AG (скрытность)"]},
+    {"id": "drive_magnetic", "name": "«Магнит»", "speed_bonus": 0, "price": 500, "rarity": "uncommon", "traits": ["Лазание по металлическим стенам"]},
+    {"id": "drive_trophy", "name": "«Трофейный»", "speed_bonus": 1, "price": 200, "rarity": "common", "traits": ["10% заклинивания при рывке"]},
+    {"id": "drive_ancient_jump", "name": "«Прыгун» (древний)", "speed_bonus": 0, "price": "Артефакт", "rarity": "legendary", "traits": ["Прыжок 10×20 м (2/день)"]}
+  ],
+  "manipulators": [
+    {"id": "manip_standard", "name": "«Захват-С»", "effect": "Стандартный трёхпалый захват", "price": 150, "rarity": "common"},
+    {"id": "manip_cargo", "name": "«Грузовой-Т»", "effect": "+2 тонны грузоподъёмности", "price": 300, "rarity": "common"},
+    {"id": "manip_sniper", "name": "«Снайпер»", "effect": "+1 BS для оружия в этой руке", "price": 350, "rarity": "uncommon"},
+    {"id": "manip_power_fist", "name": "«Кузнечный Кулак»", "effect": "+1 к урону в ближнем бою", "price": 350, "rarity": "uncommon"},
+    {"id": "manip_stealth", "name": "«Невидимка»", "effect": "Оружие скрыто от сенсоров", "price": 500, "rarity": "rare"},
+    {"id": "manip_ancient_coder", "name": "«Рука Мёртвого Кодера» (древний)", "effect": "Встроенный Скрипт 1-го круга раз в день", "price": "Артефакт", "rarity": "legendary"}
+  ],
+  "cabins": [
+    {"id": "cabin_standard", "name": "«Кабина-С»", "effect": "Стандартная, 2 места", "price": 150, "rarity": "common"},
+    {"id": "cabin_shell", "name": "«Скорлупа»", "effect": "Половина урона от критов по меху", "price": 350, "rarity": "uncommon"},
+    {"id": "cabin_screened", "name": "«Экран-К»", "effect": "Иммунитет к психическому урону извне", "price": 600, "rarity": "rare"},
+    {"id": "cabin_nora", "name": "«Норка»", "effect": "Не видна тепловизорам", "price": 500, "rarity": "uncommon"},
+    {"id": "cabin_lottery", "name": "«Лотерея» (рейдеры)", "effect": "Случайный бонус (d4)", "price": 250, "rarity": "common"},
+    {"id": "cabin_bio", "name": "«Био-Кабина»", "effect": "Регенерация пилота +1 ХП/ход", "price": "Дар", "rarity": "rare", "manufacturer": "Корпорация"}
+  ],
+  "neurohelmets": [
+    {"id": "neuro_standard", "name": "«Нейро-С»", "effect": "Стандартный", "bs_bonus": 0, "price": 150, "rarity": "common"},
+    {"id": "neuro_pilot_plus", "name": "«Пилот-Плюс»", "effect": "+1 BS в мехе", "bs_bonus": 1, "price": 450, "rarity": "uncommon"},
+    {"id": "neuro_neira5", "name": "«Нейра-5»", "effect": "+1 BS в мехе", "bs_bonus": 1, "price": 450, "rarity": "uncommon", "manufacturer": "НейраЛинк"},
+    {"id": "neuro_neira7", "name": "«Нейра-7» (древний)", "effect": "+2 BS в мехе, преимущество на инициативу", "bs_bonus": 2, "price": 3000, "rarity": "legendary", "manufacturer": "НейраЛинк"},
+    {"id": "neuro_combat", "name": "«Боевой Шлем»", "effect": "+1 к инициативе в мехе", "bs_bonus": 0, "price": 700, "rarity": "uncommon", "manufacturer": "Братство"},
+    {"id": "neuro_phantom", "name": "«Призрак»", "effect": "Не виден сенсорам при пассивном сканировании", "bs_bonus": 0, "price": 600, "rarity": "rare", "manufacturer": "Аплинк"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "hull_mods": [
+    {"id": "hull_reinforced", "name": "Усиленная обшивка", "hp_bonus": 10, "speed_penalty": 0, "price": 400, "rarity": "common", "traits": []},
+    {"id": "hull_pantsir_plates", "name": "Бронеплиты «Панцирь»", "hp_bonus": 15, "speed_penalty": 1, "price": 600, "rarity": "common", "traits": []},
+    {"id": "hull_krepost_armor", "name": "Тяжёлая броня «Крепость»", "hp_bonus": 25, "speed_penalty": 2, "price": 1000, "rarity": "uncommon", "traits": ["Помеха на AG (скрытность)"]},
+    {"id": "hull_composite", "name": "Композитная обшивка", "hp_bonus": 10, "speed_penalty": 0, "price": 800, "rarity": "uncommon", "traits": ["+1 СУ"]},
+    {"id": "hull_shielded", "name": "Экранированный корпус", "hp_bonus": 10, "speed_penalty": 0, "price": 1200, "rarity": "rare", "traits": ["Сопротивление ЭМИ"]},
+    {"id": "hull_reactive", "name": "Реактивная броня", "hp_bonus": 5, "speed_penalty": 0, "price": 1500, "rarity": "rare", "traits": ["Сопротивление взрывам"]},
+    {"id": "hull_self_repair", "name": "Самовосстанавливающаяся броня", "hp_bonus": 5, "speed_penalty": 0, "price": 2000, "rarity": "legendary", "traits": ["+1 ХП/раунд"]}
+  ]
+}
