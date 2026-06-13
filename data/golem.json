@@ -1,0 +1,531 @@
+{
+  "golem_upgrades": {
+    "rules": {
+      "description": "Кремниевый Голем не использует имплантаты. Вместо этого он улучшает свои механические компоненты через апгрейды.",
+      "alienation": "Голем не получает Отчуждения — он уже машина.",
+      "installation": {
+        "skill": "TECH",
+        "time": {
+          "common": "1 час",
+          "uncommon": "4 часа",
+          "rare": "8 часов",
+          "legendary": "24 часа"
+        },
+        "requirements": ["Источник электричества", "Ремонтный набор или мастерская"]
+      },
+      "notes": [
+        "Апгрейды несовместимы с имплантатами — это отдельная система",
+        "Каждый слот может быть занят только одним апгрейдом",
+        "Замена апгрейда требует демонтажа старого (половина времени установки)"
+      ]
+    },
+    "slots": {
+      "core": {"name": "Ядро (Реактор)", "max": 1, "description": "Энергия, сброс тепла, максимальные ХП"},
+      "processor": {"name": "Процессор (Голова)", "max": 2, "description": "Память, инициатива, сеть, знания"},
+      "optics": {"name": "Оптика (Глаза)", "max": 2, "description": "Зрение, обнаружение, прицеливание"},
+      "right_arm": {"name": "Манипулятор (Правая рука)", "max": 1, "description": "Оружие, инструменты, захваты"},
+      "left_arm": {"name": "Манипулятор (Левая рука)", "max": 1, "description": "Оружие, инструменты, захваты"},
+      "right_leg": {"name": "Привод (Правая нога)", "max": 1, "description": "Скорость, прыжки, устойчивость"},
+      "left_leg": {"name": "Привод (Левая нога)", "max": 1, "description": "Скорость, прыжки, устойчивость"},
+      "hull": {"name": "Корпус (Броня)", "max": 1, "description": "Защита, ХП, скрытность"},
+      "exotic": {"name": "Экзотика", "max": 1, "description": "Дополнительное оборудование"},
+      "extra_arms": {"name": "Дополнительные руки", "max": "Особые правила", "description": "Расширение функционала"}
+    },
+    "upgrades": {
+      "core": [
+        {
+          "id": "golem_core_standard",
+          "name": "Стандартное ядро «Искра»",
+          "effect": "Сброс тепла: 3. Базовые ХП.",
+          "heat_dissipation": 3,
+          "hp_bonus": 0,
+          "price": "Базовый компонент",
+          "rarity": "common",
+          "tech_dc": null
+        },
+        {
+          "id": "golem_core_quant5",
+          "name": "Промышленное ядро «Квант-5»",
+          "effect": "+10 к максимальным ХП. Сброс тепла: 4. Преимущество на спас-броски от истощения.",
+          "heat_dissipation": 4,
+          "hp_bonus": 10,
+          "price": 700,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_core_eternal",
+          "name": "Автономное ядро «Вечный»",
+          "effect": "Не требует подзарядки от внешних источников. Сброс тепла: 5. Энергия восстанавливается пассивно.",
+          "heat_dissipation": 5,
+          "hp_bonus": 5,
+          "price": "Артефакт",
+          "rarity": "legendary",
+          "tech_dc": 20
+        },
+        {
+          "id": "golem_core_shielded",
+          "name": "Защищённое ядро «Экран-М»",
+          "effect": "Сопротивление электрическому урону. Иммунитет к глушению ядра. Сброс тепла: 3.",
+          "heat_dissipation": 3,
+          "hp_bonus": 5,
+          "price": 900,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_core_phoenix",
+          "name": "Ядро «Феникс» (древнее)",
+          "effect": "1 раз в день — восстановление 1d8 ХП себе. Сброс тепла: 4.",
+          "heat_dissipation": 4,
+          "hp_bonus": 5,
+          "price": 1500,
+          "rarity": "rare",
+          "tech_dc": 16
+        }
+      ],
+      "processor": [
+        {
+          "id": "golem_proc_cache",
+          "name": "Чип памяти «Кеш»",
+          "effect": "+1 KNW при воспоминании фактов, чертежей, кодов",
+          "price": 120,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_proc_archive",
+          "name": "Чип памяти «Архив» (древний)",
+          "effect": "+2 KNW при воспоминании. Фотографическая память на 24 часа.",
+          "price": 900,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_proc_synapse",
+          "name": "Нейро-ускоритель «Синапс»",
+          "effect": "+1 к инициативе",
+          "price": 400,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_proc_combat_synapse",
+          "name": "Боевой нейро-ускоритель",
+          "effect": "+2 к инициативе. Помеха на PER вне боя.",
+          "price": 1000,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_proc_web",
+          "name": "Сетевой приёмник «Паутина»",
+          "effect": "+1 NET. Подключение к сети без планшета.",
+          "price": 200,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_proc_backup",
+          "name": "Модуль резервного сознания",
+          "effect": "1 раз в день — действовать 1 раунд при падении до 0 ХП",
+          "price": 800,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_proc_language",
+          "name": "Языковой декодер",
+          "effect": "Понимание всех известных языков. Говорить не обучает.",
+          "price": 150,
+          "rarity": "common",
+          "tech_dc": 10
+        }
+      ],
+      "optics": [
+        {
+          "id": "golem_optic_night",
+          "name": "Ночное зрение",
+          "effect": "Видит в темноте на 20 метров",
+          "price": 100,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_optic_thermal",
+          "name": "Тепловизор «Инфра»",
+          "effect": "Видит тепловые следы существ (включая невидимых без тепловой маскировки). Радиус 15 м.",
+          "price": 180,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_optic_eagle",
+          "name": "Зум-линза «Орёл»",
+          "effect": "+1 PER на дистанции 30+ метров",
+          "price": 120,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_optic_echo",
+          "name": "Детектор сигналов «Эхо»",
+          "effect": "Видит активные радиоволны и устройства. +1 PER для поиска техники.",
+          "price": 200,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_optic_hud_tactical",
+          "name": "Боевой HUD «Тактик»",
+          "effect": "+1 BS при стрельбе дальнего боя",
+          "price": 450,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_optic_hud_arc",
+          "name": "Боевой HUD «Арк» (древний)",
+          "effect": "+2 BS при стрельбе дальнего боя. Встроенный дальномер.",
+          "price": 1800,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_optic_recorder",
+          "name": "Модуль записи",
+          "effect": "Запись видео и аудио. Проекция голограмм.",
+          "price": 130,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_optic_scanner",
+          "name": "Глаз-сканер «Спектр»",
+          "effect": "Видит уязвимости техники. После прицеливания 1 раунд — +1d4 урона технике.",
+          "price": 350,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        }
+      ],
+      "arm": [
+        {
+          "id": "golem_arm_multitool",
+          "name": "Встроенный мультитул",
+          "effect": "+1 TECH. Всегда под рукой набор инструментов.",
+          "price": 100,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_arm_hidden_compartment",
+          "name": "Скрытый отсек",
+          "effect": "Тайник для мелкого предмета (флешка, ключ, граната).",
+          "price": 70,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_arm_shocker",
+          "name": "Скрытый шокер «Искра»",
+          "effect": "Атака ближнего боя: 1d6 электрический + оглушение (спас T Сл 12)",
+          "price": 220,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_arm_pistol",
+          "name": "Скрытый пистолет «Жало»",
+          "effect": "Дальняя атака: 1d8 кинетический, 15/45 м, магазин 3 патрона",
+          "price": 400,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_arm_magnetic",
+          "name": "Магнитный захват",
+          "effect": "Притянуть металлический предмет до 5 кг на 3 метра",
+          "price": 180,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_arm_power_fist",
+          "name": "Силовой кулак «Титан»",
+          "effect": "+2 STR для этой руки. Безоружный урон 1d8.",
+          "price": 2000,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_arm_claw",
+          "name": "Боевой протез «Коготь»",
+          "effect": "Выдвижной виброклинок: 1d8 режущий, игнорирует 3 СУ",
+          "price": 1800,
+          "rarity": "rare",
+          "tech_dc": 16
+        }
+      ],
+      "leg": [
+        {
+          "id": "golem_leg_shock",
+          "name": "Амортизаторы",
+          "effect": "Падение с высоты до 10 метров без урона",
+          "price": 90,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_leg_speed",
+          "name": "Ускорители",
+          "effect": "+1,5 метра к скорости",
+          "price": 220,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_leg_jump",
+          "name": "Прыжковые сервоприводы",
+          "effect": "Прыжок 5 м вверх × 10 м в длину. 3 раза в день.",
+          "price": 350,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_leg_magnetic",
+          "name": "Магнитные стопы",
+          "effect": "Ходьба по металлическим стенам и потолку (половина скорости)",
+          "price": 250,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_leg_rhino",
+          "name": "Усиленные приводы «Носорог»",
+          "effect": "+3 метра к скорости. Помеха на AG (скрытность).",
+          "price": 450,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_leg_speed_ancient",
+          "name": "Приводы «Скорость» (древние)",
+          "effect": "+3 метра к скорости. Преимущество на AG (акробатика).",
+          "price": 1500,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_leg_grasshopper",
+          "name": "Прыжковые сервоприводы «Кузнечик» (древние)",
+          "effect": "Прыжок 10 м вверх × 20 м в длину. 3 раза в день.",
+          "price": 1800,
+          "rarity": "rare",
+          "tech_dc": 16
+        }
+      ],
+      "hull": [
+        {
+          "id": "golem_hull_standard",
+          "name": "Стандартная кремниевая броня",
+          "effect": "СУ = 1. Базовый корпус.",
+          "su_bonus": 1,
+          "hp_bonus": 0,
+          "price": "Базовый компонент",
+          "rarity": "common",
+          "tech_dc": null
+        },
+        {
+          "id": "golem_hull_reinforced",
+          "name": "Усиленная обшивка",
+          "effect": "+10 к максимальным ХП. СУ не меняется.",
+          "su_bonus": 0,
+          "hp_bonus": 10,
+          "price": 400,
+          "rarity": "common",
+          "tech_dc": 10
+        },
+        {
+          "id": "golem_hull_chameleon",
+          "name": "Композитная броня «Хамелеон»",
+          "effect": "СУ = 2 (вместо 1). Преимущество на AG (скрытность).",
+          "su_bonus": 2,
+          "hp_bonus": 0,
+          "price": 2000,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_hull_fortress",
+          "name": "Тяжёлая броня «Крепость»",
+          "effect": "СУ = 3 (вместо 1). -1,5 м к скорости. Помеха на AG (скрытность).",
+          "su_bonus": 3,
+          "hp_bonus": 0,
+          "price": 1000,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_hull_shielded",
+          "name": "Экранированный корпус",
+          "effect": "СУ = 1. Сопротивление электрическому урону. +5 ХП.",
+          "su_bonus": 1,
+          "hp_bonus": 5,
+          "price": 1200,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_hull_reactive",
+          "name": "Реактивная броня",
+          "effect": "СУ = 1. +5 ХП. Сопротивление взрывному урону.",
+          "su_bonus": 1,
+          "hp_bonus": 5,
+          "price": 1500,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_hull_self_repair",
+          "name": "Самовосстанавливающаяся броня",
+          "effect": "СУ = 1. +5 ХП. Регенерация +1 ХП/раунд.",
+          "su_bonus": 1,
+          "hp_bonus": 5,
+          "price": 2000,
+          "rarity": "legendary",
+          "tech_dc": 20
+        }
+      ],
+      "exotic": [
+        {
+          "id": "golem_exo_tail",
+          "name": "Хвост-манипулятор «Гибкий»",
+          "effect": "Дополнительная конечность. +2 AG (акробатика). Может держать оружие.",
+          "price": 1500,
+          "rarity": "rare",
+          "tech_dc": 16,
+          "provides_extra_arm": true
+        },
+        {
+          "id": "golem_exo_antenna",
+          "name": "Гребень-антенна «Эфир»",
+          "effect": "+2 NET. Пассивное сканирование эфира.",
+          "price": 300,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_exo_camouflage",
+          "name": "Модуль камуфляжа «Невидимка»",
+          "effect": "1 раз в день — невидимость на 1 минуту",
+          "price": 2000,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_exo_shield_gen",
+          "name": "Генератор поля «Защитник»",
+          "effect": "3 заряда. Реакция — сопротивление одной атаке.",
+          "price": 700,
+          "rarity": "uncommon",
+          "tech_dc": 13
+        },
+        {
+          "id": "golem_exo_second_reactor",
+          "name": "Второй реактор (мини)",
+          "effect": "+5 к максимальным ХП. При уничтожении ядра — 50% мощности.",
+          "hp_bonus": 5,
+          "price": 1000,
+          "rarity": "rare",
+          "tech_dc": 16
+        },
+        {
+          "id": "golem_exo_chameleon_skin",
+          "name": "Хамелеон-кожа «Невидимка» (древняя)",
+          "effect": "Преимущество на AG (скрытность). +2 AG (скрытность).",
+          "price": 2000,
+          "rarity": "rare",
+          "tech_dc": 16
+        }
+      ],
+      "extra_arms": {
+        "mounts": [
+          {
+            "id": "golem_extra_shoulder",
+            "name": "Плечевое крепление",
+            "effect": "Одна дополнительная рука",
+            "price": 300,
+            "rarity": "uncommon",
+            "tech_dc": 13
+          },
+          {
+            "id": "golem_extra_back_platform",
+            "name": "Спинной модуль «Оружейная платформа»",
+            "effect": "Две дополнительные руки. 1/день — Залп (4 атаки со штрафом -3)",
+            "price": 3500,
+            "rarity": "rare",
+            "tech_dc": 18
+          },
+          {
+            "id": "golem_extra_waist",
+            "name": "Поясной манипулятор",
+            "effect": "Одна дополнительная рука. -1,5 м к скорости.",
+            "price": 200,
+            "rarity": "common",
+            "tech_dc": 10
+          }
+        ],
+        "arm_types": [
+          {
+            "id": "golem_arm_type_worker",
+            "name": "Рабочий манипулятор «Помощник»",
+            "effect": "+1 TECH, +1 к мелкой моторике. Может держать инструмент.",
+            "price": 500,
+            "rarity": "common",
+            "tech_dc": 10
+          },
+          {
+            "id": "golem_arm_type_combat",
+            "name": "Боевой манипулятор «Страж»",
+            "effect": "Может держать лёгкое оружие. Атака со штрафом -2.",
+            "price": 800,
+            "rarity": "uncommon",
+            "tech_dc": 13
+          },
+          {
+            "id": "golem_arm_type_shield",
+            "name": "Щитовой манипулятор «Бастион»",
+            "effect": "+1 СУ пока активен. Реакция — принять удар за союзника в 2 м.",
+            "price": 700,
+            "rarity": "uncommon",
+            "tech_dc": 13
+          },
+          {
+            "id": "golem_arm_type_grabber",
+            "name": "Захватный манипулятор «Удав»",
+            "effect": "Дальность 3 м. Атака +4, 1d4 дробящий + захват (спас STR Сл 13)",
+            "price": 600,
+            "rarity": "uncommon",
+            "tech_dc": 13
+          },
+          {
+            "id": "golem_arm_type_sensor",
+            "name": "Сенсорный манипулятор «Глайв»",
+            "effect": "Заглядывание за углы. +2 PER при осмотре местности.",
+            "price": 400,
+            "rarity": "common",
+            "tech_dc": 10
+          },
+          {
+            "id": "golem_arm_type_crane",
+            "name": "Тяжёлый манипулятор «Кран»",
+            "effect": "+2 STR для подъёма. Может держать тяжёлое оружие (не атакует в тот же ход).",
+            "price": 1200,
+            "rarity": "rare",
+            "tech_dc": 16
+          }
+        ]
+      }
+    }
+  }
+}
