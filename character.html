@@ -24,21 +24,20 @@
     const LEVEL_MAX_SKILL = {1:6,2:7,3:7,4:8,5:8,6:9,7:9,8:10,9:10,10:10};
     const LEVELS_WITH_SPEC = [3,6,9];
     
-    // ======================== ПРАВИЛА ИМПЛАНТАТОВ ПО РАСАМ ========================
     const IMPLANT_RULES = {
         human: { allowed: true, alienation_multiplier: 1, price_multiplier: 1, note: "Полное отчуждение" },
         mutant: { allowed: true, alienation_multiplier: 1, price_multiplier: 1, note: "Полное отчуждение" },
         glitch_mutant: { allowed: true, alienation_multiplier: 1, price_multiplier: 1, note: "Полное отчуждение" },
         crystalkin: { allowed: false, alienation_multiplier: 0, price_multiplier: 0, note: "Кристаллическая структура несовместима" },
-        beastkin: { allowed: true, alienation_multiplier: 1, price_multiplier: 1.1, note: "+10% к цене (адаптация под физиологию)" },
-        golem: { allowed: false, alienation_multiplier: 0, price_multiplier: 0, note: "Использует апгрейды (отдельная система)" },
+        beastkin: { allowed: true, alienation_multiplier: 1, price_multiplier: 1.1, note: "+10% к цене" },
+        golem: { allowed: false, alienation_multiplier: 0, price_multiplier: 0, note: "Использует апгрейды" },
         homunculus: { allowed: true, alienation_multiplier: 1, price_multiplier: 1, note: "Полное отчуждение" },
-        ai: { allowed: false, alienation_multiplier: 0, price_multiplier: 0, note: "Использует апгрейды тела-носителя" },
-        fused: { allowed: true, alienation_multiplier: 0.5, price_multiplier: 1, note: "Нельзя: нейро-имплантаты, процессоры. Можно: подкожная броня, фильтры, конечности" }
+        ai: { allowed: false, alienation_multiplier: 0, price_multiplier: 0, note: "Использует апгрейды" },
+        fused: { allowed: true, alienation_multiplier: 0.5, price_multiplier: 1, note: "Только механика" }
     };
     
-    // Запрещённые слоты для Сплавленных
     const FUSED_FORBIDDEN_SLOTS = ["Голова"];
+    let GOLEM_DATA = null;
     
     async function loadJSON(url, name) {
         try {
@@ -65,7 +64,8 @@
             loadJSON('data/backgrounds.json', 'backgrounds'),
             loadJSON('data/contacts.json', 'contacts'),
             loadJSON('data/equipment.json', 'equipment'),
-            loadJSON('data/implants.json', 'implants')
+            loadJSON('data/implants.json', 'implants'),
+            loadJSON('data/golem.json', 'golem')
         ]);
         
         if (errors.length > 0) {
@@ -86,6 +86,17 @@
         window.ARMOR_DATA = loadedData.armor.armor || loadedData.armor;
         window.BACKGROUNDS_DATA = loadedData.backgrounds.backgrounds || loadedData.backgrounds;
         window.CONTACTS_DATA = loadedData.contacts.contacts || loadedData.contacts;
+        
+        if (loadedData.golem && loadedData.golem.golem_upgrades) {
+            GOLEM_DATA = loadedData.golem;
+            console.log('✅ GOLEM_DATA загружен, слотов:', Object.keys(GOLEM_DATA.golem_upgrades.slots).length);
+        } else if (loadedData.golem) {
+            GOLEM_DATA = { golem_upgrades: loadedData.golem };
+            console.log('⚠️ GOLEM_DATA обёрнут');
+        } else {
+            GOLEM_DATA = null;
+        }
+        window.GOLEM_DATA = GOLEM_DATA;
         
         const implantsJson = loadedData.implants;
         if (implantsJson && implantsJson.implants && implantsJson.implants.items) {
@@ -123,50 +134,7 @@
     let rollResult = null;
     let rollHistory = [];
     
-    // ======================== ФУНКЦИИ ДЛЯ ПРОВЕРКИ ИМПЛАНТОВ ========================
-    function canUseImplants() {
-        const rules = IMPLANT_RULES[character.race];
-        return rules ? rules.allowed : true;
-    }
-    
-    function getImplantPriceMultiplier() {
-        const rules = IMPLANT_RULES[character.race];
-        return rules ? rules.price_multiplier : 1;
-    }
-    
-    function getImplantAlienationMultiplier() {
-        const rules = IMPLANT_RULES[character.race];
-        return rules ? rules.alienation_multiplier : 1;
-    }
-    
-    function isImplantAllowedForRace(implant) {
-        if (!canUseImplants()) return false;
-        
-        // Сплавленные: запрещены нейро-имплантаты
-        if (character.race === 'fused') {
-            if (FUSED_FORBIDDEN_SLOTS.includes(implant.slot)) {
-                return false;
-            }
-            // Также запрещаем процессорные имплантаты по ключевым словам
-            const forbiddenKeywords = ['нейро', 'чип', 'процессор', 'память', 'ускоритель', 'сознание'];
-            if (forbiddenKeywords.some(keyword => implant.name?.toLowerCase().includes(keyword) || implant.effect?.toLowerCase().includes(keyword))) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    function getImplantRestrictionNote() {
-        const rules = IMPLANT_RULES[character.race];
-        if (!rules) return null;
-        if (!rules.allowed) return rules.note;
-        if (rules.price_multiplier !== 1) return rules.note;
-        if (character.race === 'fused') return "⚠️ Доступны только механические имплантаты (броня, конечности, фильтры). Нейро-имплантаты запрещены.";
-        return null;
-    }
-    
-    // ======================== ФУНКЦИИ ДЛЯ ПЕРСОНАЖА ========================
+    // ======================== ФУНКЦИИ ПЕРСОНАЖА ========================
     function getClassData() { return CLASSES_DATA.find(c => c.id === character.class); }
     
     function getRaceBonuses() {
@@ -193,6 +161,11 @@
         }
         return bonuses;
     }
+    
+    window.getTotalSkill = function(skill) {
+        const bonuses = getRaceBonuses();
+        return (character.baseSkills[skill] || 0) + (bonuses[skill] || 0);
+    };
     
     function getTotalSkill(skill) {
         const bonuses = getRaceBonuses();
@@ -248,12 +221,16 @@
             if (armorItem) armorSU = armorItem.SU || 0;
         }
         let implantSU = character.implants.reduce((s, i) => s + (i.su_bonus || 0), 0);
+        let golemSU = 0;
+        if (character.race === 'golem' && character.golemUpgrades) {
+            golemSU = character.golemUpgrades.reduce((s, u) => s + (u.su_bonus || 0), 0);
+        }
         if (character.race === 'crystalkin') raceSU = Math.max(raceSU, 2);
         if (character.race === 'fused') {
             if (armorSU > 0) armorSU = 1;
             if (raceSU < 1) raceSU = 1;
         }
-        return base + raceSU + armorSU + implantSU;
+        return base + raceSU + armorSU + implantSU + golemSU;
     }
     
     function calculateMaxHP() {
@@ -264,15 +241,19 @@
             if (lvl === 1) totalHP += (classData?.hp_start_bonus || 0);
             else totalHP += 2 + (classData?.hp_per_level || 2);
         }
+        if (character.race === 'golem' && character.golemUpgrades) {
+            const hpBonus = character.golemUpgrades.reduce((s, u) => s + (u.hp_bonus || 0), 0);
+            totalHP += hpBonus;
+        }
         return totalHP;
     }
     
     function calculateAlienation() {
+        if (character.race === 'golem' || character.race === 'ai') return 0;
         let total = character.implants.reduce((s, i) => s + (i.alienation || 0), 0);
-        const multiplier = getImplantAlienationMultiplier();
+        const multiplier = IMPLANT_RULES[character.race]?.alienation_multiplier || 1;
         total = total * multiplier;
         if (character.race === 'fused') total = Math.ceil(total);
-        if (character.race === 'golem' || character.race === 'ai') return 0;
         return Math.min(total, 100);
     }
     
@@ -304,6 +285,40 @@
         return result;
     }
     
+    function canUseImplants() {
+        const rules = IMPLANT_RULES[character.race];
+        return rules ? rules.allowed : true;
+    }
+    
+    function getImplantPriceMultiplier() {
+        const rules = IMPLANT_RULES[character.race];
+        return rules ? rules.price_multiplier : 1;
+    }
+    
+    function getImplantAlienationMultiplier() {
+        const rules = IMPLANT_RULES[character.race];
+        return rules ? rules.alienation_multiplier : 1;
+    }
+    
+    function isImplantAllowedForRace(implant) {
+        if (!canUseImplants()) return false;
+        if (character.race === 'fused') {
+            if (FUSED_FORBIDDEN_SLOTS.includes(implant.slot)) return false;
+            const forbiddenKeywords = ['нейро', 'чип', 'процессор', 'память', 'ускоритель', 'сознание'];
+            if (forbiddenKeywords.some(keyword => implant.name?.toLowerCase().includes(keyword))) return false;
+        }
+        return true;
+    }
+    
+    function getImplantRestrictionNote() {
+        const rules = IMPLANT_RULES[character.race];
+        if (!rules) return null;
+        if (!rules.allowed) return rules.note;
+        if (rules.price_multiplier !== 1) return rules.note;
+        if (character.race === 'fused') return "⚠️ Доступны только механические имплантаты";
+        return null;
+    }
+    
     function save() { localStorage.setItem("de_character", JSON.stringify(character)); }
     
     function load() { 
@@ -312,6 +327,7 @@
             try { 
                 const loaded = JSON.parse(s);
                 character = {...character, ...loaded};
+                if (!character.golemUpgrades) character.golemUpgrades = [];
                 if (character.currentHP > character.maxHP) character.currentHP = character.maxHP;
             } catch(e) {} 
         } 
@@ -320,29 +336,103 @@
     
     function canLevelUp() { return character.level < 10 && getRemainingPoints() >= 0; }
     
-    // ======================== ФУНКЦИЯ ДОБАВЛЕНИЯ ИМПЛАНТА С ПРОВЕРКОЙ ========================
-    function addImplantWithCheck(implant) {
-        if (!canUseImplants()) {
-            alert(`Раса ${RACES_DATA.find(r => r.id === character.race)?.name || character.race} не может использовать имплантаты!\n${getImplantRestrictionNote()}`);
-            return false;
+    // ======================== ФУНКЦИИ ДЛЯ АПГРЕЙДОВ ========================
+    window.addGolemUpgrade = function(upgrade) {
+        if (!character || character.race !== 'golem') {
+            alert("Только Кремниевый Голем может использовать апгрейды!");
+            return;
+        }
+        if (!GOLEM_DATA || !GOLEM_DATA.golem_upgrades) {
+            alert("Ошибка: данные апгрейдов не загружены!");
+            return;
+        }
+        if (!upgrade.slot) {
+            alert("Ошибка: апгрейд не имеет слота!");
+            return;
         }
         
-        if (!isImplantAllowedForRace(implant)) {
-            if (character.race === 'fused') {
-                alert(`Сплавленные не могут использовать нейро-имплантаты и процессоры!\nРазрешены только механические имплантаты (броня, конечности, фильтры).`);
-            } else {
-                alert(`Имплантат "${implant.name}" недоступен для вашей расы.`);
+        const slots = GOLEM_DATA.golem_upgrades.slots;
+        const slotInfo = slots?.[upgrade.slot];
+        
+        if (slotInfo && slotInfo.max !== "Особые правила") {
+            const currentCount = (character.golemUpgrades || []).filter(u => u.slot === upgrade.slot).length;
+            if (currentCount >= slotInfo.max) {
+                alert(`Слот "${slotInfo.name}" заполнен (макс. ${slotInfo.max})`);
+                return;
             }
+        }
+        
+        const price = typeof upgrade.price === 'number' ? upgrade.price : 0;
+        if (price > 0 && character.currency < price) {
+            alert(`Недостаточно средств! Нужно ${price} Вт`);
+            return;
+        }
+        
+        if (upgrade.tech_dc) {
+            const techSkill = getTotalSkill('TECH');
+            if (techSkill < upgrade.tech_dc) {
+                if (!confirm(`⚠️ TECH навык (${techSkill}) ниже требуемого (${upgrade.tech_dc}). Продолжить?`)) {
+                    return;
+                }
+            }
+        }
+        
+        if (price > 0) character.currency -= price;
+        
+        if (!character.golemUpgrades) character.golemUpgrades = [];
+        const newUpgrade = {
+            ...upgrade,
+            installedId: Date.now() + Math.random(),
+            installedAt: new Date().toISOString()
+        };
+        
+        character.golemUpgrades.push(newUpgrade);
+        character.maxHP = calculateMaxHP();
+        if (character.currentHP > character.maxHP) character.currentHP = character.maxHP;
+        save();
+        render();
+        alert(`✅ Установлен апгрейд: ${upgrade.name}`);
+    };
+    
+    window.removeGolemUpgrade = function(index) {
+        if (!character.golemUpgrades || index < 0 || index >= character.golemUpgrades.length) return;
+        const upgrade = character.golemUpgrades[index];
+        if (confirm(`Демонтировать "${upgrade.name}"?`)) {
+            character.golemUpgrades.splice(index, 1);
+            character.maxHP = calculateMaxHP();
+            save();
+            render();
+            alert(`🔧 Апгрейд демонтирован`);
+        }
+    };
+    
+    window.installGolemUpgradeFromSelect = function(button) {
+        const select = button.previousElementSibling;
+        if (!select?.value) {
+            alert("Выберите апгрейд для установки");
+            return;
+        }
+        const upgrade = JSON.parse(select.value);
+        window.addGolemUpgrade(upgrade);
+        select.value = "";
+    };
+    
+    // ======================== ФУНКЦИИ ДЛЯ ИМПЛАНТОВ ========================
+    function addImplantWithCheck(implant) {
+        if (!canUseImplants()) {
+            alert(`Раса ${RACES_DATA.find(r => r.id === character.race)?.name || character.race} не может использовать имплантаты!`);
+            return false;
+        }
+        if (!isImplantAllowedForRace(implant)) {
+            alert(`Имплантат "${implant.name}" недоступен для вашей расы.`);
             return false;
         }
         
         let slot = implant.slot;
         if (slot === "Рука") {
-            const side = confirm("Установить в правую руку? (OK — правая, Отмена — левая)");
-            slot = side ? "Рука правая" : "Рука левая";
+            slot = confirm("Установить в правую руку?") ? "Рука правая" : "Рука левая";
         } else if (slot === "Нога") {
-            const side = confirm("Установить в правую ногу? (OK — правая, Отмена — левая)");
-            slot = side ? "Нога правая" : "Нога левая";
+            slot = confirm("Установить в правую ногу?") ? "Нога правая" : "Нога левая";
         }
         
         const SLOT_LIMITS = {Голова:2,Глаза:2,"Рука правая":1,"Рука левая":1,"Нога правая":1,"Нога левая":1,Торс:2,Экзотика:1};
@@ -354,20 +444,14 @@
             return false; 
         }
         
-        // Применяем множитель цены для звериных
-        const priceMultiplier = getImplantPriceMultiplier();
-        const finalPrice = Math.ceil(implant.price * priceMultiplier);
-        
+        const finalPrice = Math.ceil(implant.price * getImplantPriceMultiplier());
         if (character.currency < finalPrice && implant.price > 0) {
-            alert(`Недостаточно средств! Нужно ${finalPrice} Вт (${priceMultiplier > 1 ? `+${Math.round((priceMultiplier-1)*100)}% для звериных` : ''})`);
+            alert(`Недостаточно средств! Нужно ${finalPrice} Вт`);
             return false;
         }
         
-        if (implant.price > 0) {
-            character.currency -= finalPrice;
-        }
-        
-        character.implants.push({...implant, equippedSlot: slot, finalPrice: finalPrice});
+        if (implant.price > 0) character.currency -= finalPrice;
+        character.implants.push({...implant, equippedSlot: slot, finalPrice});
         save();
         render();
         return true;
@@ -396,7 +480,6 @@
             character.selectedSkills.push(skill);
         } else {
             alert(`Максимум выбранных навыков: ${maxSelections}`);
-            return;
         }
         render();
     };
@@ -408,10 +491,11 @@
         character.selectedSkills = []; 
         character.baseSkills = {BS:0,WS:0,STR:0,T:0,AG:0,INT:0,PER:0,INF:0,TECH:0,NET:0,KNW:0,SURV:0}; 
         character.spentPoints = 0; 
-        // При смене расы очищаем имплантаты, если новая раса их не поддерживает
-        if (!canUseImplants()) {
-            character.implants = [];
-        }
+        if (!canUseImplants()) character.implants = [];
+        if (r !== 'golem') character.golemUpgrades = [];
+        character.maxHP = calculateMaxHP();
+        character.currentHP = character.maxHP;
+        if (r === 'golem') activeTab = 'golem_upgrades';
         render(); 
     };
     
@@ -470,12 +554,9 @@
         character.currentHP = character.maxHP;
         character.levelHistory.unshift({level: character.level, action: `Повышение до ${character.level} уровня`, date: new Date().toLocaleString()});
         if (LEVELS_WITH_SPEC.includes(character.level) && getClassData()?.specializations) {
-            const availableSpecs = getClassData().specializations.map(s => s.name);
-            const newSpecs = availableSpecs.filter(s => !character.specializations.includes(s));
-            if (newSpecs.length > 0) alert(`Вы достигли ${character.level} уровня! Вы можете выбрать специализацию: ${newSpecs.join(", ")}`);
+            const newSpecs = getClassData().specializations.map(s => s.name).filter(s => !character.specializations.includes(s));
+            if (newSpecs.length) alert(`Вы достигли ${character.level} уровня! Доступны специализации: ${newSpecs.join(", ")}`);
         }
-        const newAbilities = getClassData()?.abilities.filter(ab => ab.level === character.level) || [];
-        if (newAbilities.length > 0) alert(`Новая способность: ${newAbilities.map(ab => ab.name).join(", ")}`);
         save(); render();
         alert(`Уровень повышен до ${character.level}!`);
     };
@@ -523,12 +604,12 @@
         window.addItem({id:"custom_consumable_"+Date.now(), name, effect, price, isCustom:true}, 'consumable');
     };
     
-    window.addSelectedWeapon = () => { const sel = document.getElementById('weaponSelect'); if(sel && sel.value) { window.addItem(JSON.parse(sel.value), 'weapon'); sel.value = ""; } };
-    window.addSelectedArmor = () => { const sel = document.getElementById('armorSelect'); if(sel && sel.value) { window.addItem(JSON.parse(sel.value), 'armor'); sel.value = ""; } };
-    window.addSelectedConsumable = () => { const sel = document.getElementById('consumableSelect'); if(sel && sel.value) { window.addItem(JSON.parse(sel.value), 'consumable'); sel.value = ""; } };
+    window.addSelectedWeapon = () => { const sel = document.getElementById('weaponSelect'); if(sel?.value) { window.addItem(JSON.parse(sel.value), 'weapon'); sel.value = ""; } };
+    window.addSelectedArmor = () => { const sel = document.getElementById('armorSelect'); if(sel?.value) { window.addItem(JSON.parse(sel.value), 'armor'); sel.value = ""; } };
+    window.addSelectedConsumable = () => { const sel = document.getElementById('consumableSelect'); if(sel?.value) { window.addItem(JSON.parse(sel.value), 'consumable'); sel.value = ""; } };
     window.addImplantFromSelect = () => { 
         const sel = document.getElementById('implantSelect'); 
-        if(sel && sel.value) { 
+        if(sel?.value) { 
             window.addImplant(JSON.parse(sel.value)); 
             sel.value = ""; 
         } 
@@ -556,7 +637,6 @@
         }
         
         if (price > 0) character.currency -= finalPrice;
-        
         window.addImplant({id:"custom_"+Date.now(), name, slot, alienation, price: price, su_bonus: 0, effect: "Кастомный имплантат", isCustom: true});
     };
     
@@ -577,6 +657,7 @@
             reader.onload = (ev) => { 
                 try { 
                     character = JSON.parse(ev.target.result); 
+                    if (!character.golemUpgrades) character.golemUpgrades = [];
                     save(); render(); 
                     alert("Импорт успешен!"); 
                 } catch(e) { alert("Ошибка импорта"); } 
@@ -596,7 +677,7 @@
                 spentPoints: 0,
                 currentHP: 10, maxHP: 10,
                 equippedArmor: null, equippedWeapon: null,
-                implants: [], inventory: [],
+                implants: [], golemUpgrades: [], inventory: [],
                 background: null, contact: null, conditions: [], levelHistory: [],
                 currency: 200
             }; 
@@ -604,8 +685,8 @@
         } 
     };
     
-    // ======================== ФУНКЦИИ РЕНДЕРА ВКЛАДОК ========================
-    function renderRaceTab(raceData, SKILLS_LIST, SKILL_NAMES) {
+    // ======================== РЕНДЕР ВКЛАДОК ========================
+    function renderRaceTab() {
         let html = `<h3>🌍 Выбор расы</h3><div class="grid-2">`;
         RACES_DATA.forEach(race => {
             const implantRule = IMPLANT_RULES[race.id];
@@ -618,6 +699,7 @@
         });
         html += `</div>`;
         
+        const raceData = RACES_DATA.find(r => r.id === character.race);
         if (character.race === "mutant" && raceData?.origins) {
             html += `<h3>Происхождение мутанта</h3><div class="grid-2">`;
             raceData.origins.forEach(o => {
@@ -636,29 +718,13 @@
         
         if (character.race === "human") {
             html += `<h3>Выберите 3 навыка для +1</h3><div class="grid-2">`;
+            const SKILLS_LIST = ["BS","WS","STR","T","AG","INT","PER","INF","TECH","NET","KNW","SURV"];
+            const SKILL_NAMES = {BS:"Стрельба",WS:"Ближний бой",STR:"Сила",T:"Выносливость",AG:"Ловкость",INT:"Интеллект",PER:"Восприятие",INF:"Влияние",TECH:"Техника",NET:"Сеть",KNW:"Знания",SURV:"Выживание"};
             SKILLS_LIST.forEach(s => {
                 const isSelected = character.selectedSkills?.includes(s);
                 html += `<div class="class-card ${isSelected ? 'selected' : ''}" onclick="toggleSkillSelection('${s}')"><h4>${SKILL_NAMES[s]} (${s})</h4></div>`;
             });
             html += `</div>`;
-        }
-        
-        if (character.race && (character.race === "mutant" || character.race === "homunculus" || character.race === "fused") && raceData?.bonus_choice && character.selectedSkills.length === 0) {
-            html += `<h3>Выберите +1 к навыку</h3><div class="grid-2">`;
-            raceData.bonus_choice.options.forEach(opt => {
-                const isSelected = character.selectedSkills?.includes(opt);
-                html += `<div class="class-card ${isSelected ? 'selected' : ''}" onclick="toggleSkillSelection('${opt}')"><h4>${SKILL_NAMES[opt]} (${opt})</h4></div>`;
-            });
-            html += `</div>`;
-        }
-        
-        // Бонусы расы
-        const raceBonuses = getRaceBonuses();
-        if (Object.keys(raceBonuses).length > 0) {
-            html += `<div style="margin-top:16px; padding:12px; background:#1a1a1a; border-radius:8px;">
-                <strong>🎯 Бонусы расы:</strong><br>
-                ${Object.entries(raceBonuses).map(([sk, val]) => `${SKILL_NAMES[sk]} +${val}`).join(', ')}
-            </div>`;
         }
         
         return html;
@@ -667,11 +733,10 @@
     function renderSkillsTab() {
         const maxForLevel = getMaxSkillForLevel();
         const remainingPoints = getRemainingPoints();
+        const SKILL_NAMES = {BS:"Стрельба",WS:"Ближний бой",STR:"Сила",T:"Выносливость",AG:"Ловкость",INT:"Интеллект",PER:"Восприятие",INF:"Влияние",TECH:"Техника",NET:"Сеть",KNW:"Знания",SURV:"Выживание"};
         
         let html = `<div class="points-left">🎯 Очки навыков: ${remainingPoints} осталось | Макс. навык: ${maxForLevel}</div>
                     <div class="skills-grid">`;
-        
-        const SKILL_NAMES = {BS:"Стрельба",WS:"Ближний бой",STR:"Сила",T:"Выносливость",AG:"Ловкость",INT:"Интеллект",PER:"Восприятие",INF:"Влияние",TECH:"Техника",NET:"Сеть",KNW:"Знания",SURV:"Выживание"};
         
         for (let [sk, name] of Object.entries(SKILL_NAMES)) {
             const total = getTotalSkill(sk);
@@ -704,8 +769,9 @@
     }
     
     function renderAbilitiesTab() {
-        const classData = CLASSES_DATA.find(c => c.id === character.class);
+        const classData = getClassData();
         const availableAbilities = getAvailableAbilities();
+        const specAbilities = getAvailableSpecAbilities();
         
         let html = `<h3>⚡ Способности класса (доступны с ${character.level} уровня)</h3>`;
         
@@ -724,7 +790,7 @@
             html += `<div class="ability-card locked">Нет доступных способностей. Повышайте уровень!</div>`;
         }
         
-        if (classData?.specializations) {
+        if (classData?.specializations && classData.specializations.length > 0) {
             html += `<h3>🎯 Специализации</h3><div>`;
             classData.specializations.forEach(spec => {
                 const isSelected = character.specializations.includes(spec.name);
@@ -733,7 +799,6 @@
             });
             html += `</div>`;
             
-            const specAbilities = getAvailableSpecAbilities();
             if (specAbilities.length > 0) {
                 html += `<h3>⭐ Способности специализаций</h3>`;
                 specAbilities.forEach(ab => {
@@ -750,6 +815,14 @@
     }
     
     function renderImplantsTab() {
+        if (character.race === 'golem') {
+            return `<div style="padding:20px; text-align:center; background:#0f1322; border-radius:16px; border:1px solid #2a2f4e;">
+                <span style="font-size:2rem;">⚙️</span>
+                <p style="margin-top:10px;"><strong>Кремниевый Голем не использует имплантаты.</strong></p>
+                <p style="color:#7c88b0;">Перейдите на вкладку <strong style="color:#4effdc;">«Апгрейды»</strong> для улучшения механических компонентов.</p>
+            </div>`;
+        }
+        
         const SLOT_LIMITS = {Голова:2,Глаза:2,"Рука правая":1,"Рука левая":1,"Нога правая":1,"Нога левая":1,Торс:2,Экзотика:1};
         const implantsBySlot = {Голова:[],Глаза:[],"Рука правая":[],"Рука левая":[],"Нога правая":[],"Нога левая":[],Торс:[],Экзотика:[]};
         
@@ -765,66 +838,130 @@
         const restrictionNote = getImplantRestrictionNote();
         const priceMultiplier = getImplantPriceMultiplier();
         
-        let html = `<h3>🦾 Имплантаты (Отчуждение: ${alienation}%)</h3>
-        <div class="alienation-container">
-            <div class="alienation-bar"><div class="alienation-fill" style="width:${alienation}%; background:${alienation>90?'#e74c3c':alienation>70?'#e74c3c':alienation>50?'#f39c12':alienation>30?'#f39c12':alienation>15?'#2ecc71':'#2ecc71'}"></div></div>
-            <div class="alienation-stage">📊 ${alienStage.stage}: ${alienStage.effect}</div>
-        </div>`;
+        let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                <h3 style="margin: 0;">🦾 Имплантаты</h3>
+                <div style="background: #1a1a2a; padding: 8px 16px; border-radius: 12px; font-size: 0.85rem;">
+                    🔄 Отчуждение: ${alienation}% | 📊 ${alienStage.stage}
+                </div>
+            </div>
+            <div class="alienation-container" style="margin-bottom: 20px;">
+                <div style="background: #2a2a3a; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width:${alienation}%; height:100%; background:${alienation>90?'#e74c3c':alienation>70?'#e74c3c':alienation>50?'#f39c12':alienation>30?'#f39c12':alienation>15?'#2ecc71':'#2ecc71'}; border-radius:4px;"></div>
+                </div>
+                <div style="font-size: 0.75rem; color: #7c88b0; margin-top: 6px;">${alienStage.effect}</div>
+            </div>
+        `;
         
         if (!canUse) {
-            html += `<div style="background:#2a1f0f; padding:12px; border-radius:8px; margin-bottom:16px; border-left:3px solid #e74c3c;">
+            html += `<div style="background:#2a1f0f; padding:12px; border-radius:12px; margin-bottom:16px; border-left:3px solid #e74c3c;">
                 ⚠️ Ваша раса не может использовать имплантаты!<br>
-                <small>${restrictionNote || 'Имплантаты недоступны'}</small>
+                <small style="color:#888;">${restrictionNote || 'Имплантаты недоступны'}</small>
             </div>`;
         } else if (priceMultiplier !== 1) {
-            html += `<div style="background:#2a1f0f; padding:8px; border-radius:8px; margin-bottom:16px; border-left:3px solid #f0a500;">
+            html += `<div style="background:#2a1f0f; padding:12px; border-radius:12px; margin-bottom:16px; border-left:3px solid #f0a500;">
                 ⚠️ ${restrictionNote || `Цена имплантатов увеличена на ${Math.round((priceMultiplier-1)*100)}%`}
             </div>`;
         }
         
         if (character.race === 'fused' && canUse) {
-            html += `<div style="background:#1a2a1a; padding:8px; border-radius:8px; margin-bottom:16px; border-left:3px solid #2ecc71;">
+            html += `<div style="background:#1a2a1a; padding:12px; border-radius:12px; margin-bottom:16px; border-left:3px solid #2ecc71;">
                 🔧 Сплавленные: доступны только механические имплантаты (броня, конечности, фильтры). Нейро-имплантаты запрещены.
             </div>`;
         }
         
-        html += `<div class="human-body"><svg class="body-svg" viewBox="0 0 200 300" style="width:180px;">
-            <rect x="75" y="10" width="50" height="50" rx="10" class="body-slot ${implantsBySlot.Голова.length ? 'has-implant' : ''}"/>
-            <text x="100" y="40" text-anchor="middle" fill="#888" font-size="8">Голова</text>
-            <circle cx="60" cy="80" r="15" class="body-slot ${implantsBySlot.Глаза.length ? 'has-implant' : ''}"/>
-            <circle cx="140" cy="80" r="15" class="body-slot ${implantsBySlot.Глаза.length ? 'has-implant' : ''}"/>
-            <rect x="70" y="100" width="60" height="80" rx="10" class="body-slot ${implantsBySlot.Торс.length ? 'has-implant' : ''}"/>
-            <rect x="30" y="110" width="30" height="60" rx="5" class="body-slot ${implantsBySlot["Рука правая"].length ? 'has-implant' : ''}"/>
-            <rect x="140" y="110" width="30" height="60" rx="5" class="body-slot ${implantsBySlot["Рука левая"].length ? 'has-implant' : ''}"/>
-            <rect x="30" y="190" width="30" height="60" rx="5" class="body-slot ${implantsBySlot["Нога правая"].length ? 'has-implant' : ''}"/>
-            <rect x="140" y="190" width="30" height="60" rx="5" class="body-slot ${implantsBySlot["Нога левая"].length ? 'has-implant' : ''}"/>
-            <rect x="85" y="260" width="30" height="20" rx="5" class="body-slot ${implantsBySlot.Экзотика.length ? 'has-implant' : ''}"/>
-            <text x="100" y="275" text-anchor="middle" fill="#888" font-size="6">Экзотика</text>
-        </svg></div>
-        <div class="body-parts">`;
+        html += `<div style="display: flex; flex-direction: column; gap: 16px;">`;
         
         for (let [slot, limit] of Object.entries(SLOT_LIMITS)) {
             const implantsList = implantsBySlot[slot] || [];
-            html += `<div class="body-part"><h4>${slot}</h4><div class="slot-limit">${implantsList.length}/${limit}</div><div class="implants-in-slot">`;
-            implantsList.forEach(imp => {
-                const finalPrice = imp.finalPrice || imp.price;
-                html += `<div class="implant-badge"><strong>${imp.name}</strong> (${imp.alienation || 0}%, ${finalPrice || imp.price} Вт)<button class="remove-imp" onclick="removeImplant(${imp.idx})">✖</button></div>`;
-            });
-            html += `</div></div>`;
+            const slotIcon = getSlotIcon(slot);
+            
+            html += `
+                <div style="background:#0f1322; border-radius:16px; padding:16px; border:1px solid #2a2f4e;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h4 style="color:#4effdc; margin:0;">${slotIcon} ${slot}</h4>
+                        <span style="font-size:0.75rem; color:#8e9ac0;">${implantsList.length}/${limit}</span>
+                    </div>
+                    <p style="font-size:0.7rem; color:#7c88b0; margin-bottom:12px;">${getSlotDescription(slot)}</p>
+            `;
+            
+            if (implantsList.length === 0) {
+                html += `<div style="color:#5a6380; font-size:0.8rem; padding:12px; text-align:center; background:#1a1e30; border-radius:8px;">— пусто —</div>`;
+            } else {
+                implantsList.forEach(imp => {
+                    const finalPrice = imp.finalPrice || imp.price;
+                    const alienationPercent = imp.alienation || 0;
+                    html += `
+                        <div style="background:#1a1e30; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="flex:1;">
+                                <strong style="color:#f0a500;">${imp.name}</strong>
+                                <div style="font-size:0.7rem; color:#bcc6f0;">${imp.effect || 'Описание отсутствует'}</div>
+                                <div style="font-size:0.65rem; color:#7c88b0; margin-top:4px;">
+                                    🔄 +${alienationPercent}% отчуждения | 💰 ${finalPrice || 0} Вт
+                                    ${imp.su_bonus ? ` | 🛡️ +${imp.su_bonus} СУ` : ''}
+                                </div>
+                            </div>
+                            <button onclick="removeImplant(${imp.idx})" style="background:#2a1a1a; border:1px solid #e74c3c; color:#e74c3c; padding:4px 12px; border-radius:20px; cursor:pointer;">✖ Демонтировать</button>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `</div>`;
         }
         
-        html += `</div>
-        <select id="implantSelect" onchange="addImplantFromSelect()" ${!canUse ? 'disabled style="opacity:0.5;"' : ''}>
-            <option value="">— Добавить имплантат —</option>
-            ${(IMPLANTS_DATA || []).map(i => {
-                const isAvailable = !character.race || isImplantAllowedForRace(i);
-                const finalPrice = Math.ceil(i.price * priceMultiplier);
-                return `<option value='${JSON.stringify(i)}' ${!isAvailable ? 'disabled style="opacity:0.3;"' : ''}>${i.name} (${i.slot}, ${i.alienation || 0}% отч., ${finalPrice} Вт)${!isAvailable ? ' — НЕДОСТУПЕН' : ''}</option>`;
-            }).join('')}
-        </select>
-        <button class="btn-secondary" onclick="addCustomImplant()" ${!canUse ? 'disabled style="opacity:0.5;"' : ''}>⚙️ + Кастомный имплантат</button>`;
+        html += `</div>`;
+        
+        // Добавление нового имплантата
+        html += `
+            <div style="margin-top: 20px; background:#0f1322; border-radius:16px; padding:16px; border:1px solid #2a2f4e;">
+                <h4 style="color:#4effdc; margin:0 0 12px 0;">📦 Добавить имплантат</h4>
+                <select id="implantSelect" onchange="addImplantFromSelect()" ${!canUse ? 'disabled' : ''} style="width:100%; padding:10px; background:#1a1a2a; border:1px solid #4effdc; border-radius:8px; color:#ccc; margin-bottom:8px;">
+                    <option value="">— выбрать имплантат —</option>
+                    ${(IMPLANTS_DATA || []).map(i => {
+                        const isAvailable = !character.race || isImplantAllowedForRace(i);
+                        const finalPrice = Math.ceil(i.price * priceMultiplier);
+                        const alienationPercent = i.alienation || 0;
+                        return `<option value='${JSON.stringify(i)}' ${!isAvailable ? 'disabled style="opacity:0.4;"' : ''}>
+                            ${i.name} — ${i.slot} | 🔄 +${alienationPercent}% | 💰 ${finalPrice} Вт
+                            ${!isAvailable ? ' (НЕДОСТУПЕН)' : ''}
+                        </option>`;
+                    }).join('')}
+                </select>
+                <button class="btn-secondary" onclick="addCustomImplant()" ${!canUse ? 'disabled' : ''} style="width:100%; background:#4effdc20; border:1px solid #4effdc; color:#4effdc; padding:10px; border-radius:8px; cursor:pointer;">⚙️ + Создать кастомный имплантат</button>
+            </div>
+        `;
         
         return html;
+    }
+    
+    // Вспомогательные функции для иконок и описаний слотов
+    function getSlotIcon(slot) {
+        const icons = {
+            "Голова": "🧠",
+            "Глаза": "👁️",
+            "Рука правая": "🦾",
+            "Рука левая": "🦾",
+            "Нога правая": "🦿",
+            "Нога левая": "🦿",
+            "Торс": "💪",
+            "Экзотика": "✨"
+        };
+        return icons[slot] || "🔧";
+    }
+    
+    function getSlotDescription(slot) {
+        const descriptions = {
+            "Голова": "Нейро-имплантаты, чипы, процессоры",
+            "Глаза": "Оптические имплантаты, сенсоры, HUD",
+            "Рука правая": "Манипуляторы, оружие, протезы",
+            "Рука левая": "Манипуляторы, оружие, протезы",
+            "Нога правая": "Сервоприводы, амортизаторы",
+            "Нога левая": "Сервоприводы, амортизаторы",
+            "Торс": "Органы, броня, фильтры",
+            "Экзотика": "Хвосты, крылья, антенны"
+        };
+        return descriptions[slot] || "Дополнительное улучшение";
     }
     
     function renderGearTab() {
@@ -891,9 +1028,120 @@
             html += `<div class="history-item">Нет записей. Повышайте уровень!</div>`;
         } else {
             character.levelHistory.forEach(entry => {
-                html += `<div class="history-item"><strong>Уровень ${entry.level}</strong><br>${entry.action || ''}<br><small>${entry.date || ''}</small></div>`;
+                html += `<div class="history-item">
+                    <strong>📈 Уровень ${entry.level}</strong><br>
+                    ${entry.action || ''}<br>
+                    <small>${entry.date || ''}</small>
+                </div>`;
             });
         }
+        html += `</div>`;
+        return html;
+    }
+    
+    // ======================== РЕНДЕР ВКЛАДКИ АПГРЕЙДОВ ========================
+    function renderGolemUpgradesTab() {
+        if (!GOLEM_DATA || !GOLEM_DATA.golem_upgrades) {
+            return `<div class="error-message">❌ Данные апгрейдов не загружены. Проверьте файл data/golem.json</div>`;
+        }
+        
+        const upgradesData = GOLEM_DATA.golem_upgrades;
+        const slots = upgradesData.slots;
+        const allUpgrades = upgradesData.upgrades;
+        
+        let totalHp = 0, totalSu = 0, heatDissipation = 3;
+        for (let up of (character.golemUpgrades || [])) {
+            if (up.hp_bonus) totalHp += up.hp_bonus;
+            if (up.su_bonus) totalSu += up.su_bonus;
+            if (up.heat_dissipation) heatDissipation = up.heat_dissipation;
+        }
+        
+        let html = `
+            <h3>⚙️ Апгрейды Кремниевого Голема</h3>
+            <div style="background:#1a1a2a; padding:10px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                <span>🔥 Сброс тепла: ${heatDissipation}</span>
+                <span>❤️ +${totalHp} ХП</span>
+                <span>🛡️ +${totalSu} СУ</span>
+                <span>💰 ${character.currency} Вт</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+        `;
+        
+        for (let [slotKey, slotInfo] of Object.entries(slots)) {
+            if (slotKey === 'extra_arms') continue;
+            
+            const installed = (character.golemUpgrades || []).filter(u => u.slot === slotKey);
+            const maxSlots = slotInfo.max;
+            const isFull = installed.length >= maxSlots && maxSlots !== "Особые правила";
+            
+            let availableUpgrades = [];
+            if (allUpgrades[slotKey] && Array.isArray(allUpgrades[slotKey])) {
+                availableUpgrades = [...allUpgrades[slotKey]];
+            }
+            else if ((slotKey === 'right_arm' || slotKey === 'left_arm') && allUpgrades.arm && Array.isArray(allUpgrades.arm)) {
+                availableUpgrades = [...allUpgrades.arm];
+            }
+            else if ((slotKey === 'right_leg' || slotKey === 'left_leg') && allUpgrades.leg && Array.isArray(allUpgrades.leg)) {
+                availableUpgrades = [...allUpgrades.leg];
+            }
+            
+            html += `
+                <div style="background:#0f1322; border-radius:16px; padding:16px; border:1px solid #2a2f4e;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <h4 style="color:#4effdc; margin:0;">${slotInfo.name}</h4>
+                        <span>${installed.length}/${maxSlots === "Особые правила" ? "∞" : maxSlots}</span>
+                    </div>
+                    <p style="font-size:0.75rem; color:#888; margin-bottom:12px;">${slotInfo.description}</p>
+            `;
+            
+            for (let i = 0; i < installed.length; i++) {
+                const up = installed[i];
+                const idx = character.golemUpgrades.findIndex(u => u.installedId === up.installedId);
+                html += `
+                    <div style="background:#1a1e30; border-radius:8px; padding:8px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div><strong>${up.name}</strong><br><small>${up.effect || ''}</small></div>
+                        <button onclick="removeGolemUpgrade(${idx})" style="background:#2a1a1a; border:1px solid #e74c3c; color:#e74c3c; padding:4px 12px; border-radius:20px;">✖</button>
+                    </div>
+                `;
+            }
+            
+            if (availableUpgrades.length > 0 && !isFull) {
+                const notInstalled = availableUpgrades.filter(up => !installed.some(i => i.id === up.id));
+                if (notInstalled.length > 0) {
+                    const selectId = `select_${slotKey}_${Date.now()}`;
+                    html += `
+                        <select id="${selectId}" style="width:100%; padding:8px; background:#1a1a2a; border:1px solid #4effdc; border-radius:8px; color:#ccc; margin-top:8px;">
+                            <option value="">— выбрать апгрейд —</option>
+                            ${notInstalled.map(up => {
+                                const priceText = typeof up.price === 'number' ? `${up.price} Вт` : up.price;
+                                return `<option value='${JSON.stringify({...up, slot: slotKey})}'>${up.name} — ${(up.effect || '').substring(0, 40)} (${priceText})</option>`;
+                            }).join('')}
+                        </select>
+                        <button onclick="const sel=document.getElementById('${selectId}'); if(sel.value) addGolemUpgrade(JSON.parse(sel.value)); else alert('Выберите апгрейд')" 
+                            style="margin-top:8px; width:100%; background:#4effdc20; border:1px solid #4effdc; color:#4effdc; padding:8px; border-radius:8px;">🔧 Установить</button>
+                    `;
+                } else {
+                    html += `<div style="color:#888; font-size:0.7rem; margin-top:8px;">✅ Все апгрейды установлены</div>`;
+                }
+            } else if (isFull) {
+                html += `<div style="color:#e74c3c; font-size:0.7rem; margin-top:8px;">⚠️ Слот заполнен (макс. ${maxSlots})</div>`;
+            } else if (availableUpgrades.length === 0) {
+                html += `<div style="color:#888; font-size:0.7rem; margin-top:8px;">📦 Нет доступных апгрейдов</div>`;
+            }
+            
+            html += `</div>`;
+        }
+        
+        if (upgradesData.rules) {
+            html += `
+                <div style="background:#0a0e18; border-left:3px solid #4effdc; padding:12px; margin-top:8px; font-size:0.7rem;">
+                    <strong>📋 Правила:</strong><br>
+                    • ${upgradesData.rules.description}<br>
+                    • Требования: ${(upgradesData.rules.installation?.requirements || []).join(', ')}
+                </div>
+            `;
+        }
+        
         html += `</div>`;
         return html;
     }
@@ -901,36 +1149,27 @@
     // ======================== ОСНОВНОЙ РЕНДЕР ========================
     function render() {
         const app = document.getElementById("app");
+        const isGolem = character.race === 'golem';
         const hpPercent = (character.currentHP / character.maxHP) * 100;
         const su = calculateSU();
         character.maxHP = calculateMaxHP();
         
         const SKILLS_LIST = ["BS","WS","STR","T","AG","INT","PER","INF","TECH","NET","KNW","SURV"];
-        const SKILL_NAMES = {BS:"Стрельба",WS:"Ближний бой",STR:"Сила",T:"Выносливость",AG:"Ловкость",INT:"Интеллект",PER:"Восприятие",INF:"Влияние",TECH:"Техника",NET:"Сеть",KNW:"Знания",SURV:"Выживание"};
         
-        const raceData = RACES_DATA.find(r => r.id === character.race);
+        const historyRollsHtml = `
+            <div class="roll-history">
+                <h4>🎲 История бросков <button class="clear-history-btn" onclick="clearHistory()">Очистить</button></h4>
+                <div class="history-list-rolls">
+                    ${rollHistory.length === 0 ? '<div style="color:#888;">Нет бросков</div>' :
+                        rollHistory.map(h => `<div class="history-roll-item ${h.success ? 'history-roll-success' : 'history-roll-fail'}">
+                            ${h.time} — ${h.skill}: ${h.roll} vs ${h.target} → ${h.success ? '✓ УСПЕХ' : '✗ ПРОВАЛ'}
+                        </div>`).join('')
+                    }
+                </div>
+            </div>
+        `;
         
-        let racesHtml = renderRaceTab(raceData, SKILLS_LIST, SKILL_NAMES);
-        let skillsHtml = renderSkillsTab();
-        let classesHtml = renderClassTab();
-        let abilitiesHtml = renderAbilitiesTab();
-        let implantsHtml = renderImplantsTab();
-        let gearHtml = renderGearTab();
-        let historyHtml = renderHistoryTab();
-        
-        // История бросков
-        let historyRollsHtml = `<div class="roll-history"><h4>🎲 История бросков <button class="clear-history-btn" onclick="clearHistory()">Очистить</button></h4><div class="history-list-rolls">`;
-        if (rollHistory.length === 0) historyRollsHtml += `<div class="history-roll-item" style="color:#888;">Нет бросков</div>`;
-        else {
-            rollHistory.forEach(h => {
-                historyRollsHtml += `<div class="history-roll-item ${h.success ? 'history-roll-success' : 'history-roll-fail'}">
-                    ${h.time} — ${h.skill}: ${h.roll} vs ${h.target} → ${h.success ? '✓ УСПЕХ' : '✗ ПРОВАЛ'}
-                </div>`;
-            });
-        }
-        historyRollsHtml += `</div></div>`;
-        
-        const html = `
+        const fullHtml = `
             <div class="header">
                 <div class="logo" onclick="goToMainMenu()">
                     <h1>⚙️ Инженеры Подземелий</h1>
@@ -960,9 +1199,12 @@
                     <div class="hp-manager">
                         <div class="hp-bar"><div class="hp-fill ${hpPercent>50?'green':hpPercent>25?'yellow':'red'}" style="width:${hpPercent}%"></div></div>
                         <div class="hp-controls">
-                            <button class="hp-btn" onclick="modifyHP(-10)">-10</button><button class="hp-btn" onclick="modifyHP(-5)">-5</button>
-                            <button class="hp-btn" onclick="modifyHP(-1)">-1</button><button class="hp-btn" onclick="modifyHP(1)">+1</button>
-                            <button class="hp-btn" onclick="modifyHP(5)">+5</button><button class="hp-btn" onclick="modifyHP(10)">+10</button>
+                            <button class="hp-btn" onclick="modifyHP(-10)">-10</button>
+                            <button class="hp-btn" onclick="modifyHP(-5)">-5</button>
+                            <button class="hp-btn" onclick="modifyHP(-1)">-1</button>
+                            <button class="hp-btn" onclick="modifyHP(1)">+1</button>
+                            <button class="hp-btn" onclick="modifyHP(5)">+5</button>
+                            <button class="hp-btn" onclick="modifyHP(10)">+10</button>
                         </div>
                     </div>
                     <div class="conditions">
@@ -983,21 +1225,28 @@
                         <button class="tab-btn ${activeTab==='skills'?'active':''}" onclick="setTab('skills')">📊 Навыки</button>
                         <button class="tab-btn ${activeTab==='class'?'active':''}" onclick="setTab('class')">🤖 Класс</button>
                         <button class="tab-btn ${activeTab==='abilities'?'active':''}" onclick="setTab('abilities')">⚡ Способности</button>
-                        <button class="tab-btn ${activeTab==='implants'?'active':''}" onclick="setTab('implants')">🦾 Импланты</button>
+                        ${!isGolem ? 
+                            `<button class="tab-btn ${activeTab==='implants'?'active':''}" onclick="setTab('implants')">🦾 Импланты</button>` : 
+                            `<button class="tab-btn ${activeTab==='golem_upgrades'?'active':''}" onclick="setTab('golem_upgrades')">⚙️ Апгрейды</button>`
+                        }
                         <button class="tab-btn ${activeTab==='gear'?'active':''}" onclick="setTab('gear')">🎒 Снаряжение</button>
                         <button class="tab-btn ${activeTab==='history'?'active':''}" onclick="setTab('history')">📜 История</button>
                     </div>
-                    <div id="tab-race" class="tab-content ${activeTab==='race'?'active':''}">${racesHtml}</div>
-                    <div id="tab-skills" class="tab-content ${activeTab==='skills'?'active':''}">${skillsHtml}</div>
-                    <div id="tab-class" class="tab-content ${activeTab==='class'?'active':''}">${classesHtml}</div>
-                    <div id="tab-abilities" class="tab-content ${activeTab==='abilities'?'active':''}">${abilitiesHtml}</div>
-                    <div id="tab-implants" class="tab-content ${activeTab==='implants'?'active':''}">${implantsHtml}</div>
-                    <div id="tab-gear" class="tab-content ${activeTab==='gear'?'active':''}">${gearHtml}</div>
-                    <div id="tab-history" class="tab-content ${activeTab==='history'?'active':''}">${historyHtml}</div>
+                    <div id="tab-race" class="tab-content ${activeTab==='race'?'active':''}">${renderRaceTab()}</div>
+                    <div id="tab-skills" class="tab-content ${activeTab==='skills'?'active':''}">${renderSkillsTab()}</div>
+                    <div id="tab-class" class="tab-content ${activeTab==='class'?'active':''}">${renderClassTab()}</div>
+                    <div id="tab-abilities" class="tab-content ${activeTab==='abilities'?'active':''}">${renderAbilitiesTab()}</div>
+                    ${!isGolem ? 
+                        `<div id="tab-implants" class="tab-content ${activeTab==='implants'?'active':''}">${renderImplantsTab()}</div>` :
+                        `<div id="tab-golem_upgrades" class="tab-content ${activeTab==='golem_upgrades'?'active':''}">${renderGolemUpgradesTab()}</div>`
+                    }
+                    <div id="tab-gear" class="tab-content ${activeTab==='gear'?'active':''}">${renderGearTab()}</div>
+                    <div id="tab-history" class="tab-content ${activeTab==='history'?'active':''}">${renderHistoryTab()}</div>
                 </div>
             </div>
         `;
-        app.innerHTML = html;
+        
+        app.innerHTML = fullHtml;
     }
     
     function startApp() {
@@ -1009,7 +1258,7 @@
             spentPoints: 0,
             currentHP: 10, maxHP: 10,
             equippedArmor: null, equippedWeapon: null,
-            implants: [], inventory: [],
+            implants: [], golemUpgrades: [], inventory: [],
             background: null, contact: null, conditions: [], levelHistory: [],
             currency: 200
         };
